@@ -4,6 +4,9 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics.pairwise import cosine_similarity
 import time
+from flask import Flask, request, render_template, jsonify
+
+app = Flask(__name__)
 
 class TextVectorSearchEngine:
     def __init__(self, documents=None):
@@ -38,7 +41,6 @@ class TextVectorSearchEngine:
         return pipeline
 
 
-# Example usage:
 if __name__ == "__main__":
     # Initialize the text search engine with training documents
     with open("sentences.txt") as f:
@@ -55,3 +57,23 @@ if __name__ == "__main__":
     print(f"Displayed in: {round(time.time() - start_time, 3)}s")
     for doc_id, similarity in results:
         print(f"{documents[doc_id]}, Similarity: {similarity}")
+
+# @app.route("/")
+# def main():
+#     return render_template("./index.html")
+#
+# @app.route("/search", methods=["GET"])
+# def search():
+#     query_text = request.form.get("q")
+#     if query_text is None:
+#         query_text = "empty"
+#     start_time = time.time()
+#     results = text_search_engine.search(query_text)
+#     time_elapsed = round(time.time() - start_time, 3)
+#     search_results = []
+#     for doc_id, similarity in results:
+#         search_results.append(documents[doc_id])
+#     final = {"results": search_results, "time_elapsed": time_elapsed}
+#     return jsonify(final)
+#
+# app.run(host="0.0.0.0", port=3000)

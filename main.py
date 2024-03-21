@@ -3,23 +3,20 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics.pairwise import cosine_similarity
-
+import time
 
 class TextVectorSearchEngine:
-    def __init__(self):
+    def __init__(self, documents=None):
         self.index = {}
         self.pipeline = self._build_pipeline()
-        self.fitted = False
+        if documents:
+            self.fit_documents(documents)
 
-    def index_document(self, doc_id, text):
-        self.index[doc_id] = text
-        self.fitted = False
+    def fit_documents(self, documents):
+        self.pipeline.fit(documents)
+        self.index = {i: doc for i, doc in enumerate(documents)}
 
     def search(self, query_text, k=5):
-        if not self.fitted:
-            self.pipeline.fit(list(self.index.values()))
-            self.fitted = True
-
         query_vector = self.pipeline.transform([query_text])
         results = []
         for doc_id, text in self.index.items():
@@ -43,21 +40,18 @@ class TextVectorSearchEngine:
 
 # Example usage:
 if __name__ == "__main__":
-    # Initialize the text search engine
-    text_search_engine = TextVectorSearchEngine()
+    # Initialize the text search engine with training documents
+    with open("sentences.txt") as f:
+        documents = [line.rstrip('\n') for line in f]
+    text_search_engine = TextVectorSearchEngine(documents)
 
-    # Index some sample documents
-    text_search_engine.index_document("doc1", "This is a sentence about math class.")
-    text_search_engine.index_document("doc2", "I like dogs")
-    text_search_engine.index_document("doc3", "Math class is amazing.")
-    text_search_engine.index_document("doc4", "I hate math class.")
-
-    # Perform a search
-    # query_text = "I love math class!"
-    query_text = input("Enter a query: ")
-    results = text_search_engine.search(query_text)
+    query_text = input("What is your search query? ")
+    n = int(input("How many results? "))
+    start_time = time.time()
+    results = text_search_engine.search(query_text, k=n)
 
     # Print the search results
     print("Search Results:")
+    print(f"Displayed in: {round(time.time() - start_time, 3)}s")
     for doc_id, similarity in results:
-        print(f"Document ID: {doc_id}, Similarity: {similarity}")
+        print(f"{documents[doc_id]}, Similarity: {similarity}")
